@@ -1,0 +1,104 @@
+---
+title: "SGupta_HW03Q17"
+format: pdf
+editor: visual
+---
+
+The overall free throw proportion and results of free throws for ten National Basketball Association players for the 2016–2017 season
+
+(a) Describe your model for studying the clutch success probability including the likelihood and prior - Uploaded separately as the scanned copy
+
+(b) Plot the posteriors of the clutch success probabilities.
+
+```{r}
+players <- c("Russell", "James", "Kawahi", "Lebron", 
+             "Isaiah", "Stephane", "Giannis", "John", 
+             "Anthony", "Kevin")
+overall <- c(0.845, 0.847, 0.880, 0.674, 0.909, 0.898, 0.770, 0.801, 0.802, 0.875)
+y <- c(64, 72, 55, 27, 75, 24, 28, 66, 40, 13)
+n <- c(75, 95, 63, 39, 83, 26, 41, 82, 54, 16)
+```
+
+```{r}
+# Posterior alpha beta parameters
+alpha <- y + 1       
+beta  <- n - y + 1   
+```
+
+# Posterior mean: (y+1)/(n+2)
+
+# 95% credible interval = qbeta(0.025, y+1, n-y+1) and qbeta(0.975, y+1, n-y+1)
+
+```{r}
+post_mean <- alpha / (alpha + beta)
+ci_lower <- qbeta(0.025, alpha, beta)
+ci_upper <- qbeta(0.975, alpha, beta)
+```
+
+# Summarize in a table.
+
+```{r}
+summary_table <- data.frame(player = players,
+                            overall_percent = overall,
+                            clutch_makes = y,
+                            clutch_attempts = n,
+                            posterior_mean = round(post_mean, 3),
+                            ci_lower = round(ci_lower, 3),
+                            ci_upper = round(ci_upper, 3))
+print("Posterior Summaries with Uniform Prior ")
+print(summary_table)
+```
+
+# Plot the posteriors of the clutch success probabilities.
+
+```{r}
+par(mfrow = c(2, 5), mar = c(4, 4, 2, 1))
+x_grid <- seq(0, 1, length.out = 1000)
+for (i in 1:length(players)) {
+  plot(x_grid, dbeta(x_grid, alpha[i], beta[i]), type = "l", lwd = 2,
+       xlab = "Clutch Success Probability", ylab = "Density",
+       main = players[i])
+  # Add a vertical line at the overall free throw percentage 
+  abline(v = overall[i], col = "red", lty = 2)
+}
+# Reset 
+par(mfrow = c(1, 1))
+```
+
+By comparing the overall free throw percentage (red line) and the posterior summaries, we can see overall percentage lies within the 95% credible interval. If it falls outside, then the player’s clutch performance is statistically different from his overall performance.
+
+-   For Russell, overall percent is 0.845, and the posterior mean in clutch situations is 0.844, with a CI of (0.756, 0.916).
+
+-   For James, overall percent is 0.847, and the posterior mean is 0.753, with CI (0.663, 0.833)
+
+-   and so on
+
+-   Players such as Russell, Kawahi, Isaiah, and John show posterior means very close to their overall percentages, with the overall value falling within the 95% credible interval.
+
+-   For players like James, Giannis, Anthony, and possibly Kevin, the overall percentage lies outside or near the lower edge of the 95% credible interval for their clutch performance
+
+# That is, do small changes in the prior lead to substantial changes in the posterior?
+
+# Try Beta(2,2),
+
+```{r}
+alpha_new <- y + 2
+beta_new <- n - y + 2
+
+post_mean_new <- alpha_new / (alpha_new + beta_new)
+ci_lower_new <- qbeta(0.025, alpha_new, beta_new)
+ci_upper_new <- qbeta(0.975, alpha_new, beta_new)
+
+summary_table_new <- data.frame(Player = players,
+                                Posterior_Mean_new = round(post_mean_new, 3),
+                                CI_Lower_new = round(ci_lower_new, 3),
+                                CI_Upper_new = round(ci_upper_new, 3))
+print("Posterior Summaries with new Prior (Beta(2,2)):")
+print(summary_table_new)
+```
+
+The outcomes obtained with the Beta(2,2) prior are quite comparable to those using the Beta(1,1) prior. For instance, in the case of Russell, the posterior mean shifts from roughly 0.844 to 0.835, and the credible interval only changes a little, moving from about (0.756, 0.916) to (0.747, 0.908). Similar minor variations are observed for the other players as well.
+
+Small changes in the prior from Beta⁡(1,1) to Beta⁡(2,2) do not lead to substantial changes in the posterior estimates.
+
+This confirms that the conclusions about clutch performance differences are not sensitive to the prior choice.

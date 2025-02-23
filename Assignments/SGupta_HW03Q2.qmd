@@ -1,0 +1,57 @@
+---
+title: "SGupta_HW03Q2"
+format: pdf
+editor: visual
+---
+
+The Major League Baseball player Reggie Jackson, known as "Mr. October" for his outstanding performances in the World Series played 2,820 regular-season games during his career, hitting a total of 563 home runs. Additionally, he played in 27 World Series games and hit 10 home runs during those games.
+
+Prior part of this question is uploaded separately as scaned copy
+
+```{r}
+# Regular season data:
+n_reg <- 2820
+y_reg <- 563
+alpha_reg <- y_reg + 1      
+beta_reg  <- n_reg - y_reg + 1  
+
+# World Series data:
+n_world <- 27
+y_world <- 10
+alpha_world <- y_world + 1        
+beta_world  <- n_world - y_world + 1  
+
+# Posterior summaries:
+mean_reg <- alpha_reg / (alpha_reg + beta_reg)
+mean_world  <- alpha_world / (alpha_world + beta_world)
+ci_reg <- qbeta(c(0.025, 0.975), alpha_reg, beta_reg)
+ci_world  <- qbeta(c(0.025, 0.975), alpha_world, beta_world)
+
+print(" Regular Season Posterior for home run rate: ")
+print(paste("  Posterior ~ Beta(", alpha_reg, ",", beta_reg, ")", sep = ""))
+print(paste("  Mean =", round(mean_reg, 3)))
+print(paste("  95% Credible Interval = [", round(ci_reg[1], 3), ",", round(ci_reg[2], 3), "]"))
+
+print(" World Series Posterior for home run rate: ")
+print(paste("  Posterior ~ Beta(", alpha_world, ",", beta_world, ")", sep = ""))
+print(paste("  Mean =", round(mean_world, 3) ))
+print(paste("  95% Credible Interval = [", round(ci_world[1], 3), ",", round(ci_world[2], 3), "]"))
+
+# Monte Carlo comparison: Compute the probability that theta_world_Series > theta_regular_games.
+set.seed(123)
+Nsimulation <- 100000
+theta_reg_simulation <- rbeta(Nsimulation, alpha_reg, beta_reg)
+theta_worldseries_simulation  <- rbeta(Nsimulation, alpha_world, beta_world)
+probability <- mean(theta_worldseries_simulation > theta_reg_simulation)
+print(paste("Posterior probability that World Series rate > Regular season rate:", 
+    round(probability, 4)))
+
+```
+
+Regular Season Posterior is Beta(564,2258), mean 0.200 and 95% CI is (0.185, 0.215)
+
+World Series Posterior Beta(11,18), mean 0.379 and 95% CI (0.215, 0.559)
+
+Monte Carlo Probability 0.9845
+
+So basically if we start with a flat (uninformative) prior, the analysis shows that Reggie regular season home run rate is about 20% and that estimate is pretty tight. But in the World Series, his rate jumps to around 38%. Overall there is about a 98.45% chance that his World Series rate is higher than his regular-season rate, which is really strong evidence that he performs better in October.

@@ -1,0 +1,89 @@
+---
+title: "SGupta_HW03Q13"
+format: pdf
+editor: visual
+---
+
+## Question 13
+
+# Plot the PDF of NDVI for forested and deforested pixels, and the marginal distribution of NDVI averaging over categories.
+
+
+The forested NDVI density : ff(x) = dbeta(x,25,10)
+The deforested NDVI density : fd(x) = dbeta(x,10,15)
+The marginal density f(x) = 0.9 * ff(x) + 0.1 * fd(x)
+
+
+```{r}
+# Create a grid for NDVI values between 0 and 1.
+ndvi <- seq(0, 1, length.out = 1000)
+
+# Find the PDFs for forested and deforested pixels.
+pdf_forest <- dbeta(ndvi, shape1 = 25, shape2 = 10)
+pdf_defor  <- dbeta(ndvi, shape1 = 10, shape2 = 15)
+
+# Marginal PDF
+pdf_marginal <- 0.9 * pdf_forest + 0.1 * pdf_defor
+
+# Plot the PDFs.
+plot(ndvi, pdf_forest, type = "l", lwd = 2, col = "green",
+     ylim = c(0, max(pdf_forest, pdf_defor, pdf_marginal)),
+     xlab = "NDVI", ylab = "Density", main = "NDVI PDFs")
+lines(ndvi, pdf_defor, lwd = 2, col = "red")
+lines(ndvi, pdf_marginal, lwd = 2, col = "blue")
+legend("topright", legend = c("Forested: Beta(25,10)", "Deforested: Beta(10,15)", "Marginal"),
+       col = c("green", "red", "blue"), lwd = 2)
+
+```
+
+# Give an expression for the probability that a pixel is deforested given its NDVI value, and plot this probability by NDVI.
+
+Using Bayes’ theorem, the probability that a pixel is deforested given its NDVI value  is 
+p(deforested | x) = 0.1 dbeta(x;10,15) / (0.1 dbeta(x; 10,15) + 0.9 dbeta(x;25,10))
+
+```{r}
+# Compute the weighted likelihoods.
+p_deforest <- 0.1 * dbeta(ndvi, 10, 15)
+p_forest <- 0.9 * dbeta(ndvi, 25, 10)
+
+# Compute the posterior probability for deforestation.
+posterior_deforest <- p_deforest / (p_deforest + p_forest)
+
+# Plot the probability as a function of NDVI.
+plot(ndvi, posterior_deforest, type = "l", lwd = 2, col = "red",
+     xlab = "NDVI", ylab = "P(deforested | NDVI)",
+     main = "Posterior Probability of Deforestation")
+grid()
+
+
+
+```
+
+# You will classify a pixel as deforested if you are at least 90% sure it is deforested. Following this rule, give the range of NDVI that will lead to a pixel being classified as deforested.
+
+classify a pixel as deforested if p(deforested | x) >= 0.9
+
+```{r}
+# Identify NDVI values for which the posterior probability >= 0.9.
+
+plot(ndvi, posterior_deforest, type = "l",
+     xlab = "NDVI", ylab = "Posterior Probability",
+     main = "Posterior Probability of Deforestation")
+grid()
+
+classified_deforest <- ndvi[posterior_deforest >= 0.9]
+
+# Report the range.
+ndvi_range <- range(classified_deforest)
+print(ndvi_range)  # Prints the min and max NDVI values meeting the criterion.
+
+# Mark these on the plot:
+abline(h = 0.9, lty = 2, col = "gray")
+points(ndvi_range, c(0.9, 0.9), pch = 19, col = "blue")
+text(ndvi_range, c(0.91, 0.91), labels = round(ndvi_range, 3), pos = 3, col = "blue")
+
+
+
+```
+
+

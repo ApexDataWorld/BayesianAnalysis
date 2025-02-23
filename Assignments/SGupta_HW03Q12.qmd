@@ -1,0 +1,54 @@
+---
+title: "SGupta_HW03Q12"
+format: pdf
+editor: visual
+---
+
+## Question 12
+
+Make a scatter plot of the data and, assuming the correlation parameter ρ has a Uniform(-1,1) prior, plot the posterior distribution of ρ.
+
+```{r}
+# Data
+x <- c(-3.3, 0.1, -1.1, 2.7, 2.0, -0.4)
+y <- c(-2.6, -0.2, -1.5, 1.5, 1.9, -0.3)
+n <- length(x)
+
+# Create a grid of rho values 
+rho_grid <- seq(-0.99, 0.99, length.out = 1000)
+
+# Define a function to compute the log-likelihood for a given rho.
+log_likelihood_rho <- function(rho, x, y) {
+
+  # Sum this for all values as per the log likelhood from the scanned notes 
+  log_likelihood <- sum(-0.5*log(2*pi) - 0.5*log(1 - rho^2) -
+              (1/(2*(1 - rho^2)))*(x^2 - 2*rho*x*y + y^2))
+  return(log_likelihood)
+}
+
+# Find the log likelihood for each value of rho
+logL <- sapply(rho_grid, log_likelihood_rho, x = x, y = y)
+
+# subtract maximum log likelihood 
+LogL2 <- exp(logL - max(logL))
+
+# find the posterior density by normalizing.
+posterior_rho <- LogL2 / sum(LogL2 * (rho_grid[2] - rho_grid[1]))
+
+
+par(mfrow = c(1, 2))
+
+# Scatter plot of the data
+plot(x, y, pch = 16, col = "blue", main = "Scatter Plot of (X, Y)",
+     xlab = "X", ylab = "Y")
+grid()
+
+# Posterior density plot for rho
+plot(rho_grid, posterior_rho, type = "l", lwd = 2, col = "red",
+     main = "Posterior Distribution of ρ",
+     xlab = expression(rho), ylab = "Density")
+grid()
+
+```
+
+You can add options to executable code like this

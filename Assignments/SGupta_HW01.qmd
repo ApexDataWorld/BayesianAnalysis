@@ -1,0 +1,72 @@
+---
+title: "SGupta_HW01"
+---
+## Download the tyrannosaurid growth curves data 
+```{r}
+# Read the data from a CSV file
+growth_data <- read.csv("/Users/saurabhgupta/projects/statistics/ST540/GrowthCurvesData.csv", header = TRUE)
+# Display the first few rows of the data to verify
+head(growth_data)
+```
+## (a) Write a loop to compute the mean and standard deviation of the mass for each taxon.
+```{r}
+# Unique taxa
+unique_taxon <- unique(growth_data$Taxon)
+# Initialize a results dataframe
+results <- data.frame(Taxon = character(), Mean_Mass = numeric(), Std_Dev_Mass = numeric())
+# Loop through each taxon
+for (taxon in unique_taxon) {
+  # Filter data for the current taxon
+  taxon_dataset <- growth_data[growth_data$Taxon == taxon, ]
+  # Compute mean and standard deviation
+  mean_mass <- mean(taxon_dataset$Mass)
+  std_dev_mass <- sd(taxon_dataset$Mass)
+  # Append the results
+  results <- rbind(results, data.frame(Taxon = taxon, Mean_Mass = mean_mass, Std_Dev_Mass = std_dev_mass))
+}
+# Display the results
+print(results)
+```
+## (b) Make a plot of age versus mass that includes all observations but a different plotting symbol or color for each taxon.
+```{r}
+# Assign colors for each taxon
+colors <- c("red", "blue", "green", "purple")
+taxon <- unique(growth_data$Taxon)
+growth_data$Color <- colors[match(growth_data$Taxon, taxon)]
+
+# Plot Age vs Mass
+plot(
+  growth_data$Age, growth_data$Mass,
+  col = growth_data$Color, pch = 16,
+  xlab = "Age (years)", ylab = "Mass (kg)",
+  main = "Age vs Mass for Different Taxa"
+)
+# Add legend
+legend(
+  "topright", legend = taxon, col = colors, pch = 16,
+  title = "Taxon"
+)
+```
+## (c) Perform a non-Bayesian linear regression of y=log(mass) onto x=log(age) (ignoring taxon), and interpret the results.  
+```{r}
+# Log-transform age and mass
+growth_data$log_Age <- log(growth_data$Age)
+growth_data$log_Mass <- log(growth_data$Mass)
+# Perform linear regression
+regression_model <- lm(log_Mass ~ log_Age, data = growth_data)
+# Display summary of the regression
+summary(regression_model)
+```
+Regression model: log (mass) = beta 0 = beta 1 log ( age ) * e
+
+beta 0 is Intercept and beta 1 - Slope which indicates the relationship between log(age) and log(mass). Specifically, it shows the proportional change in mass for a proportional change in age.
+
+The residuals range from -0.8279 to 0.8437, with the median residual being -0.1350. This suggests a reasonably symmetric distribution of residuals
+
+The intercept is 2.2946 which indicates when log(age)=0 the predicted log(mass) is 2.2946
+The slope is 1.7538 which means 1% increase in age correspond to approx a 1.75% increase in mass on average 
+
+R-squared: Indicates how well the model explains the variance in the data (higher values mean a better fit).It is 0.87 which means our model is a good fit. 
+
+p-values: Assess the statistical significance of the coefficients (p<0.05p<0.05), suggests model is highly significant overall, indicating that log⁡(Age) is a strong predictor of log(Mas). 
+
